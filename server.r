@@ -24,9 +24,9 @@ graph_color_adder <- function(graph, fire_matrix, inputVal){
 
 graph_dim_adder <- function(graph, coor) {
   for (i in 1:nrow(graph$nodes)){
-    index <- as.numeric(str_extract(graph$nodes$id[i], pattern = "[[:digit:]]*$"))
-    graph$nodes$x[i] <- coor[index,1]
-    graph$nodes$y[i] <- coor[index,2]
+    #index <- as.numeric(str_extract(graph$nodes$id[i], pattern = "[[:digit:]]*$"))
+    graph$nodes$x[i] <- coor[i,1]
+    graph$nodes$y[i] <- coor[i,2]
   }
   return(graph)
 }
@@ -75,15 +75,15 @@ numCA2 <- sum(new_group_names=="CA2")
 numCA3 <- sum(new_group_names=="CA3")
 
 #creates some rough locations for the different neurons to appear
-DG_xy_coor <- matrix(c(runif(numDG,25,35),linspace(25,35,numDG)),nrow=numDG,ncol=2)
-EC_xy_coor <- matrix(c(runif(numEC,6,19),linspace(25,35,numEC)),nrow=numEC,ncol=2)
-SUB_xy_coor <- matrix(c(runif(numSUB,20,23),linspace(25,28,numSUB)),nrow=numSUB,ncol=2)
-CA1_xy_coor <- matrix(c(linspace(7,29,numCA1),runif(numCA1, 10,20)),nrow=numCA1,ncol=2)
-CA2_xy_coor <- matrix(c(linspace(30,39,numCA2),runif(numCA2,13,24)),nrow=numCA2,ncol=2)
-CA3_xy_coor <- matrix(c(runif(numCA3,36,43),linspace(25,35,numCA3)),nrow=numCA3,ncol=2)
+#DG_xy_coor <- matrix(c(runif(numDG,25,35),linspace(25,35,numDG)),nrow=numDG,ncol=2)
+#EC_xy_coor <- matrix(c(runif(numEC,6,19),linspace(25,35,numEC)),nrow=numEC,ncol=2)
+#SUB_xy_coor <- matrix(c(runif(numSUB,20,23),linspace(25,28,numSUB)),nrow=numSUB,ncol=2)
+#CA1_xy_coor <- matrix(c(linspace(7,29,numCA1),runif(numCA1, 10,20)),nrow=numCA1,ncol=2)
+#CA2_xy_coor <- matrix(c(linspace(30,39,numCA2),runif(numCA2,13,24)),nrow=numCA2,ncol=2)
+#CA3_xy_coor <- matrix(c(runif(numCA3,36,43),linspace(25,35,numCA3)),nrow=numCA3,ncol=2)
 
 #creates a full coordinate matrix
-full_coor <- rbind(DG_xy_coor,CA3_xy_coor, CA2_xy_coor, CA1_xy_coor, SUB_xy_coor, EC_xy_coor)
+#full_coor <- rbind(DG_xy_coor,CA3_xy_coor, CA2_xy_coor, CA1_xy_coor, SUB_xy_coor, EC_xy_coor)
 
 firing_rate_0_125 <- read.csv(file="weight_0.125firing_of_rate.csv", header=FALSE)
 firing_rate_0_3 <- read.csv(file="weight_0.3firing_of_rate.csv", header=FALSE)
@@ -154,9 +154,10 @@ shinyServer(function(input, output) {
       
     }
     plot_betweenness <- betweenness(graph_to_plot)
+    #graph_to_plot <- layout_with_fr(graph_to_plot)
     final_graph <- toVisNetworkData(graph_to_plot) #turns igraph into
     final_graph <- graph_grouper(final_graph)
-    final_graph <- graph_dim_adder(final_graph, full_coor)
+    final_graph <- graph_dim_adder(final_graph, layout_with_fr(graph_to_plot))
     final_graph <- cell_type_to_node_shape(final_graph, cell_type)
     if(input$color!='Group'){final_graph <- graph_color_adder(final_graph, firing_rate_matrix,input$color)}
     if (input$size == "Betweenness") {final_graph <- betweenness_to_size(final_graph, plot_betweenness)}
